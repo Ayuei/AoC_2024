@@ -76,7 +76,6 @@ fn main() {
             let value = check_invalid_line(line.clone(), &mut map);
             if value == 0 {
                 let value_two = reoder_invalid_line(line, &mut map);
-                println!("{value_two}");
 
                 part_two_total += value_two;
             }
