@@ -65,6 +65,7 @@ fn main() {
     let mut part_two_total = 0;
 
     for line in puzzle.map_while(|l| l.ok()).filter(|l| l.len() > 0) {
+        // Create graph
         if line.contains("|") {
             let values: Vec<usize> = line.split("|").map(|v| v.parse::<usize>().unwrap()).collect();
 

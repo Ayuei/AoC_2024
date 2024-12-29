@@ -1,0 +1,80 @@
+struct Point {
+    heuristic: usize,
+    pos: (usize, usize),
+    cost: usize,
+    path: Vec<(usize, usize)>
+}
+
+impl Point {
+    fn manhattan_distance(p1: (usize, usize), p2: (usize, usize)) -> usize {
+        p1.0.abs_diff(p2.0) + p1.1.abs_diff(p2.1)
+    }
+
+    fn get_cost(self, new_p: Vec<usize, usize>) {
+    }
+}
+
+
+fn get_path_score(path: &Vec<Operation>) -> usize {
+    let prev = Operation::Start;
+    let mut score = 0;
+
+    for op in path.iter().skip(1) {
+        if Operation::is_turn(&op, &prev) {
+            score += 1000;
+        } else {
+            score += 1;
+        }
+    }
+
+    score
+}
+
+fn a_star_flood_fill(maze: Vec<Vec<char>>, row: usize, col: usize, current: &mut Vec<(usize, usize)>, result: &mut Vec<(usize, usize)>) {
+    let height = maze.len();
+    let width = maze.first().unwrap().len();
+
+    if row >= height || row < 0 || col < 0 || col >= width {
+        return
+    }
+
+    let cur = &maze[row][col];
+
+    let pr = BinaryHeap::new();
+
+}
+
+
+fn generate_possible_path(coord: (usize, usize), map: &Vec<Vec<char>>, symbols: &[Operation], seen: &mut HashSet<(usize, usize)>, current: &mut Vec<Operation>, result: &mut Vec<Vec<Operation>>) {
+    let x_bound = map.first().unwrap().len();
+    let y_bound = map.len();
+
+    // Finish line
+    if map[coord.1][coord.0] == 'E' {
+        result.push(current.iter().map(|o| o.clone()).collect());
+        return;
+    }
+
+    let prev_symbol = current.last().unwrap().clone();
+
+    for &symbol in symbols {
+        let Some(new_coord) = symbol.apply_direction(coord, x_bound-1, y_bound-1) else {
+            // println!("Out of bounds");
+            // Early exit
+            continue
+        };
+
+        if seen.contains(&new_coord) {
+            continue
+        }
+
+        // We hit a wall, continue
+        if map[new_coord.1][new_coord.0] == '#' {
+            continue
+        }
+
+        seen.insert(new_coord);
+        current.push(symbol);
+        generate_possible_path(new_coord, map, symbols, seen, current, result);
+    }
+}
