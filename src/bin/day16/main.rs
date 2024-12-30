@@ -1,9 +1,9 @@
-use std::cmp::{Ordering, Reverse};
-use std::collections::{BinaryHeap, HashSet};
+use std::cmp::{Ordering, PartialEq, Reverse};
+use std::collections::{BinaryHeap, HashMap, HashSet};
 use advent_of_code_2024::read_puzzle_input;
 
 
-#[derive(Copy, Debug, Clone)]
+#[derive(PartialEq, Copy, Debug, Clone)]
 enum Direction {
     Up,
     Down,
@@ -81,6 +81,7 @@ impl Ord for Path {
     }
 }
 
+
 // Find all the best paths
 fn a_star_flood_fill(maze: &Vec<Vec<char>>, start: (usize, usize), end: (usize, usize)) -> Vec<Path> {
     let height = maze.len();
@@ -90,6 +91,9 @@ fn a_star_flood_fill(maze: &Vec<Vec<char>>, start: (usize, usize), end: (usize, 
     let mut best_cost = usize::MAX;
     let mut best_paths = Vec::new();
 
+    // Keep track of the best cost to reach a certain point
+    let mut best_cost_for_p: HashMap<(usize, usize), usize> = HashMap::new();
+
     pr.push(Reverse(Path::new(0 + manhattan_distance(start, end), start, 0,
                               vec![start], HashSet::new(),
                               vec![Direction::Right], Direction::Right)));
@@ -97,7 +101,11 @@ fn a_star_flood_fill(maze: &Vec<Vec<char>>, start: (usize, usize), end: (usize, 
     while !pr.is_empty() {
         let mut p = pr.pop().unwrap().0;
 
-        println!("{}", p.cost);
+        if p.cost < *best_cost_for_p.entry(p.pos).or_insert(usize::MAX) {
+            best_cost_for_p.insert(p.pos, p.cost + 1001);
+        } else {
+            continue
+        }
 
         if p.pos == end {
             if best_cost == usize::MAX {
@@ -112,6 +120,29 @@ fn a_star_flood_fill(maze: &Vec<Vec<char>>, start: (usize, usize), end: (usize, 
         }
 
         for direction in [Direction::Up, Direction::Down, Direction::Left, Direction::Right] {
+            match p.direction {
+                Direction::Up => {
+                    if direction == Direction::Down {
+                        continue;
+                    }
+                }
+                Direction::Down => {
+                    if direction == Direction::Up {
+                        continue;
+                    }
+                }
+                Direction::Left => {
+                    if direction == Direction::Right {
+                        continue;
+                    }
+                }
+                Direction::Right => {
+                    if direction == Direction::Left {
+                        continue;
+                    }
+                }
+            }
+
             let (dy, dx) = direction.get_update();
 
             let row= p.pos.0 as isize + dy;
